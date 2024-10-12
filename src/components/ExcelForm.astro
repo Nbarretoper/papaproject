@@ -2,7 +2,6 @@
 import Input from "./Input.astro";
 import Select from "./Select.astro";
 import { getUruguayDate } from "../utils/getUruguayDate.js";
-import { server } from "../actions/index.ts";
 
 const uruguayDate = getUruguayDate();
 const vehiculoOptions = [
@@ -37,24 +36,22 @@ const razonesOptions = [
       id="controlForm"
       class="space-y-4"
       method="post"
-      action={server.excelForm}
+      onsubmit="event.preventDefault();"
     >
       <!-- Fecha -->
       <Input
         label="Fecha"
-        type="text"
+        type="date"
         name="fecha"
         value={uruguayDate}
         placeholder="DD/MM/AAAA"
-        class="w-full p-2 border border-gray-300 rounded"
       />
 
       <!-- Numero de camioneta -->
       <Select
-        label="Número de camioneta"
-        name="camioneta"
+        label="Modelo de camioneta"
+        name="modelo"
         options={vehiculoOptions}
-        class="w-full p-2 border border-gray-300 rounded"
       />
 
       <!-- Articulo -->
@@ -63,7 +60,6 @@ const razonesOptions = [
         type="text"
         name="articulo"
         placeholder="Artículo"
-        class="w-full p-2 border border-gray-300 rounded"
       />
 
       <!-- Cantidad -->
@@ -72,34 +68,16 @@ const razonesOptions = [
         type="number"
         name="cantidad"
         placeholder="Cantidad"
-        class="w-full p-2 border border-gray-300 rounded"
       />
 
       <!-- Motivo -->
-      <Select
-        label="Motivo"
-        name="motivo"
-        options={razonesOptions}
-        class="w-full p-2 border border-gray-300 rounded"
-      />
+      <Select label="Motivo" name="motivo" options={razonesOptions} />
 
       <!-- Chofer -->
-      <Input
-        label="Chofer"
-        type="text"
-        name="chofer"
-        placeholder="Chofer"
-        class="w-full p-2 border border-gray-300 rounded"
-      />
+      <Input label="Chofer" type="text" name="chofer" placeholder="Chofer" />
 
       <!-- Otros -->
-      <Input
-        label="Otros"
-        type="text"
-        name="otros"
-        placeholder="Otros"
-        class="w-full p-2 border border-gray-300 rounded"
-      />
+      <Input label="Otros" type="text" name="otros" placeholder="Otros" />
 
       <!-- Boton de enviar -->
       <button
@@ -113,35 +91,26 @@ const razonesOptions = [
 </div>
 
 <script>
-  import { isInputError, actions } from "astro:actions";
+  import { actions } from "astro:actions";
 
-  const { setInputError } = actions;
-  const form = document.getElementById("contact-form") as HTMLFormElement;
+  const form = document.querySelector("form");
 
-  function validateForm() {
-    const inputs = form.querySelectorAll("input, select");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
 
-    inputs.forEach((input) => {
-      if (!input.value) {
-        setInputError(input.name, true);
-      } else {
-        setInputError(input.name, false);
-      }
-    });
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    validateForm();
-
-    const { data, error } = await actions.excelForm(formData);
-
-    if (data) {
-      form.reset();
+    const { data: response, error } = await actions.excelForm(data); 
+   
+    if (error) {
+      console.log(error);
+      alert(`Error: ${error.message}`);
     }
 
-    if (error) {
-      console.error(error);
+    if (response) {
+      console.log(response);
+      alert("Formulario enviado correctamente");
+      form.reset();
     }
   });
 </script>

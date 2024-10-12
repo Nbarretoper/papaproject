@@ -4,15 +4,15 @@ import { z } from 'astro:schema';
 
 export const server = {
   excelForm: defineAction({
-    accept: 'form',
+    accept: 'json',
     input: z.object({
       fecha: z.string(),
-      camioneta: z.string(),
+      modelo: z.string(),
       articulo: z.string(),
       cantidad: z.string(),
       motivo: z.string(),
       chofer: z.string(),
-      otros: z.string(),
+      otros: z.string().optional(),
     }),
     async handler( data ) {
       try {

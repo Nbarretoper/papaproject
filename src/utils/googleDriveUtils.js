@@ -1,21 +1,27 @@
 import { google } from "googleapis";
 
-/*  EXECEL DE TEST
-https://docs.google.com/spreadsheets/d/13G4VniwL6rGSgYOTnOfZDkZ1191WUy7B07lYve3QwJw/edit?usp=sharing
-*/
-
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
-const keyFile = "./credentials.json";
-const spreadsheetId = "1fakjS91ERmG3XLBz18BR1pwihV8CnPP3OvMw5cZnt98";
+const spreadsheetId = import.meta.env.GOOGLE_SHEET_ID || process.env.GOOGLE_SHEET_ID;
 const valueInputOption = "USER_ENTERED";
-
 const RANGETOREAD = "A1:G1";
 const RANGETOWRITE = "A2:G2";
 
 const authorize = async () => {
   try {
     const auth = new google.auth.GoogleAuth({
-      keyFile,
+      credentials: {
+      type: 'service_account',
+      project_id: import.meta.env.GOOGLE_PROJECT_ID || process.env.GOOGLE_PROJECT_ID,
+      private_key_id: import.meta.env.GOOGLE_PRIVATE_KEY_ID || process.env.GOOGLE_PRIVATE_KEY_ID,
+      private_key: import.meta.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_PRIVATE_KEY,
+      client_email: import.meta.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_CLIENT_EMAIL,
+      client_id: import.meta.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID,
+      auth_uri: import.meta.env.GOOGLE_AUTH_URI || process.env.GOOGLE_AUTH_URI,
+      token_uri: import.meta.env.GOOGLE_TOKEN_URI || process.env.GOOGLE_TOKEN_URI,
+      universeDomain: import.meta.env.GOOGLE_UNIVERSE_DOMAIN || process.env.GOOGLE_UNIVERSE_DOMAIN,
+      auth_provider_x509_cert_url: import.meta.env.GOOGLE_AUTH_PROVIDER_X509_CERT_URL || process.env.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+      client_x509_cert_url: import.meta.env.GOOGLE_CLIENT_X509_CERT_URL || process.env.GOOGLE_CLIENT_X509_CERT_URL,
+      },
       scopes: SCOPES,
     });
 
@@ -37,9 +43,8 @@ const getSheetHeaders = async () => {
       spreadsheetId,
       range,
     });
-    console.log("Obteniendo encabezados del Spreadsheet:", response);
+
     const headers = response.data.values[0];
-    console.log("Encabezados:", headers);
     return headers;
   } catch (error) {
     console.error("Error al obtener los encabezados:", error);
@@ -51,7 +56,6 @@ const saveDataToSheet = async (data) => {
   try {
     const auth = await authorize();
     const sheets = google.sheets({ version: "v4", auth });
-
     const headers = await getSheetHeaders();
 
     const row = headers.map((header) => {

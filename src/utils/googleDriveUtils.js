@@ -4,11 +4,13 @@ import { google } from "googleapis";
 https://docs.google.com/spreadsheets/d/13G4VniwL6rGSgYOTnOfZDkZ1191WUy7B07lYve3QwJw/edit?usp=sharing
 */
 
-
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 const keyFile = "./credentials.json";
-const spreadsheetId = "13G4VniwL6rGSgYOTnOfZDkZ1191WUy7B07lYve3QwJw";
+const spreadsheetId = "1fakjS91ERmG3XLBz18BR1pwihV8CnPP3OvMw5cZnt98";
 const valueInputOption = "USER_ENTERED";
+
+const RANGETOREAD = "A1:G1";
+const RANGETOWRITE = "A2:G2";
 
 const authorize = async () => {
   try {
@@ -29,7 +31,7 @@ const getSheetHeaders = async () => {
   try {
     const auth = await authorize();
     const sheets = google.sheets({ version: "v4", auth });
-    const range = "A1:G1";
+    const range = RANGETOREAD;
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -73,14 +75,13 @@ const saveDataToSheet = async (data) => {
       }
     });
 
-    const range = "A2:G2";
-    const values = [row];
+    const range = RANGETOWRITE;
 
     const request = {
       spreadsheetId,
       range,
       valueInputOption,
-      resource: { values },
+      resource: { values: [row] },
     };
 
     const response = await sheets.spreadsheets.values.append(request);
